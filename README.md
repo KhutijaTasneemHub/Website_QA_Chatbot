@@ -74,6 +74,54 @@ vector_store = FAISS.from_texts(chunks, embeddings)
 Each text slice is converted into embeddings (AI-readable math).
 Stored in FAISS - so later we can search for the most relevant parts of the website.
 
+**Ask Questions About the Website**
+question = st.text_input("Ask a question about this website:")
+
+The user types a question like:
+“What is Python?” (if the website is python.org)
+
+**Find Relevant Text & Get AI Answer**
+similar_docs = vector_store.similarity_search(question, k=4)
+
+llm = ChatOpenAI(
+    openai_api_key=OPENAI_API_KEY,
+    temperature=0,
+    model_name="gpt-3.5-turbo"
+)
+
+chain = load_qa_chain(llm, chain_type="stuff")
+
+answer = chain.run(input_documents=similar_docs, question=question)
+
+
+Find relevant chunks (like searching inside the vector database).
+ChatOpenAI is called - feeds those chunks + your question into GPT.
+GPT thinks - then generates a clean answer for you.
+
+
+**Show the Answer**
+st.write("### Answer")
+st.write(answer)
+
+Finally, your chatbot prints the answer on the webpage!!!! 
+
+
+**How to Run This Project:**
+Clone this repo:
+git clone https://github.com/<your-username>/Website_QA_Chatbot.git
+cd Website_QA_Chatbot
+
+Install requirements:
+pip install -r requirements.txt
+
+Create a .env file in the project folder:
+OPENAI_API_KEY=your_openai_api_key_here
+
+
+Run the app:
+streamlit run app.py
+
+Open the link shown (usually http://localhost:8501) in your browser.
 
 
 
