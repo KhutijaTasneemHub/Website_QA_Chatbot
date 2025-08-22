@@ -4,7 +4,7 @@ This project is a chatbot that can read the content of any website you give it a
 It’s like teaching your computer to "read a website" and then "talk back to you" about it.
 Built using Python, Streamlit, LangChain, and OpenAI GPT model.
 
-**Import the tools we need**
+**1.Import the tools we need**
 import streamlit as st
 import requests
 from bs4 import BeautifulSoup
@@ -13,7 +13,7 @@ Streamlit (st) - Makes a nice web app (so we don’t have to run things in the t
 Requests - Helps us "visit" a website and download its code (HTML).
 BeautifulSoup - Like a cleaner: it goes into that messy HTML code and pulls out only the text we care about (paragraphs).
 
-**Import AI-related tools**
+**2.Import AI-related tools**
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -25,7 +25,7 @@ from langchain_community.chat_models import ChatOpenAI
 **FAISS** - A special box that stores those math numbers and lets us quickly search similar ones.
 **QA Chain + ChatOpenAI** - The actual AI brain (GPT model) that reads the chunks and gives smart answers.
 
-**Load your API key safely**
+**3.Load your API key safely**
 _import os
 from dotenv import load_dotenv
 
@@ -38,14 +38,14 @@ We keep our secret OpenAI key inside a hidden .env file.
 This key lets us "talk" to OpenAI’s AI models.
 If the key is missing - the app stops safely.
 
-**Streamlit App Layout**
+**4.Streamlit App Layout**
 st.header("Website Content Chatbot")
 url = st.text_input("Enter a website URL (example: https://www.python.org):")
 
 Shows a title on the app.
 Lets you type (paste) a website link.
 
-**Fetch the Website Content**
+**5.Fetch the Website Content**
 resp = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=15)
 soup = BeautifulSoup(resp.text, "html.parser")
 paragraphs = [p.get_text(" ", strip=True) for p in soup.find_all("p")]
@@ -55,7 +55,7 @@ requests.get(url) - goes to the website (like opening it in a browser).
 BeautifulSoup - grabs only the readable text inside <p> tags (paragraphs).
 Joins everything into one big text string = website_text.
 
-**Split the Text into Chunks**
+**6.Split the Text into Chunks**
 text_splitter = RecursiveCharacterTextSplitter(
     separators=["\n"],
     chunk_size=500,
@@ -67,20 +67,20 @@ chunks = text_splitter.split_text(website_text)
 A website might have thousands of words (too big for AI at once).
 We cut it into small slices of 500 characters each, with a little overlap (50 chars) so AI doesn’t lose context.
 
-**Store Website Text in Vector Database**
+**7.Store Website Text in Vector Database**
 embeddings = OpenAIEmbeddings(openai_api_key=OPENAI_API_KEY)
 vector_store = FAISS.from_texts(chunks, embeddings)
 
 Each text slice is converted into embeddings (AI-readable math).
 Stored in FAISS - so later we can search for the most relevant parts of the website.
 
-**Ask Questions About the Website**
+**8.Ask Questions About the Website**
 question = st.text_input("Ask a question about this website:")
 
 The user types a question like:
 “What is Python?” (if the website is python.org)
 
-**Find Relevant Text & Get AI Answer**
+**9.Find Relevant Text & Get AI Answer**
 similar_docs = vector_store.similarity_search(question, k=4)
 
 llm = ChatOpenAI(
@@ -99,14 +99,14 @@ ChatOpenAI is called - feeds those chunks + your question into GPT.
 GPT thinks - then generates a clean answer for you.
 
 
-**Show the Answer**
+**10.Show the Answer**
 st.write("### Answer")
 st.write(answer)
 
 Finally, your chatbot prints the answer on the webpage!!!! 
 
 
-**How to Run This Project:**
+**11.How to Run This Project:**
 Clone this repo:
 git clone https://github.com/<your-username>/Website_QA_Chatbot.git
 cd Website_QA_Chatbot
