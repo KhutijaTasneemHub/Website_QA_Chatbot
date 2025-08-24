@@ -4,5 +4,6 @@ beautifulsoup4
 langchain
 langchain-community
 faiss-cpu
-openai
 python-dotenv
+tiktoken
+openai
