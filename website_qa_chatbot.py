@@ -2,16 +2,10 @@ import streamlit as st
 import requests
 from bs4 import BeautifulSoup
 
-# from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
-
-# NEW imports replacing load_qa_chain (LangChain 0.2+ update)
-# create_stuff_documents_chain is the correct replacement
-from langchain.chains.combine_documents import create_stuff_documents_chain
-from langchain_core.prompts import PromptTemplate
-
+from langchain.chains.question_answering import load_qa_chain
 from langchain_community.chat_models import ChatOpenAI
 
 import os
@@ -79,39 +73,11 @@ if url and website_text.strip():
             model_name="gpt-3.5-turbo"  # keep same as your other projects
         )
 
-        # -----------------------------------------------------
-        # NEW BLOCK — fully replacing old load_qa_chain usage
-        # Compatible with LangChain 0.2+ (Streamlit Cloud version)
-        # -----------------------------------------------------
+        # 3) QA chain
+        chain = load_qa_chain(llm, chain_type="stuff")
 
-        # Create a prompt template that instructs the model how to answer questions.
-        prompt = PromptTemplate.from_template("""
-Use the following context to answer the question.
-If the answer is not in the context, say "The website does not contain that information."
-
-Context:
-{context}
-
-Question:
-{question}
-
-Answer:
-""")
-
-        # create_stuff_documents_chain is the official replacement for StuffDocumentsChain
-        # It internally handles combining document chunks ("stuffing") + passing them to the LLM.
-        chain = create_stuff_documents_chain(
-            llm=llm,
-            prompt=prompt
-        )
-
-        # Run the chain and get the answer
-        answer = chain.invoke({
-            "context": similar_docs,
-            "question": question
-        })
-
-        # -----------------------------------------------------
+        # 4) Get the answer
+        answer = chain.run(input_documents=similar_docs, question=question)
 
         st.write("### Answer")
         st.write(answer)
